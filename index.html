@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Taekwondo İl İçi Seçme Kayıt Sistemi</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #21253a;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.15);
+    --text: #f0f2ff;
+    --text-muted: #8891b0;
+    --accent: #4f6ef7;
+    --accent-hover: #3d5ce8;
+    --accent-bg: rgba(79,110,247,0.12);
+    --accent-border: rgba(79,110,247,0.35);
+    --success: #22c55e;
+    --success-bg: rgba(34,197,94,0.12);
+    --danger: #ef4444;
+    --danger-bg: rgba(239,68,68,0.1);
+    --radius: 10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo {
+    width: 42px; height: 42px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+
+  header h1 { font-size: 17px; font-weight: 600; color: var(--text); }
+  header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; }
+  .tab { flex: 1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 14px; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+  .tab.active { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+  .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 1.5rem; color: var(--text); }
+
+  .field { margin-bottom: 1.1rem; }
+  .field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 7px; font-weight: 500; }
+  .field input {
+    width: 100%; padding: 10px 13px;
+    background: var(--surface2); border: 1px solid var(--border-strong);
+    border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.15); }
+  .field input::placeholder { color: var(--text-muted); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+  .submit-btn {
+    width: 100%; padding: 11px; margin-top: 6px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; letter-spacing: 0.01em;
+  }
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .toast {
+    display: none; margin-top: 14px; padding: 11px 15px;
+    border-radius: var(--radius); font-size: 13px; font-weight: 500;
+  }
+  .toast.ok { display: block; background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+  .toast.err { display: block; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
+
+  .list-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
+  .list-top h2 { font-size: 15px; font-weight: 600; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .icon-btn {
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: transparent; color: var(--text-muted);
+    font-size: 13px; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .icon-btn.danger { border-color: rgba(239,68,68,0.4); color: var(--danger); }
+  .icon-btn.danger:hover { background: var(--danger-bg); }
+
+  .summary { display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 120px; }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-val { font-size: 26px; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+  .empty { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+  .empty .icon { font-size: 44px; margin-bottom: 14px; opacity: 0.3; }
+  .empty p { font-size: 14px; }
+
+  .cat-block { margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .cat-title {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px;
+    background: var(--accent-bg);
+    border-bottom: 1px solid var(--accent-border);
+  }
+  .cat-title .kat-adi { font-weight: 600; font-size: 14px; color: var(--accent); }
+  .cat-badge {
+    font-size: 11px; font-weight: 600;
+    background: var(--accent); color: #fff;
+    padding: 2px 9px; border-radius: 20px;
+  }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead th {
+    padding: 9px 14px; font-size: 11px; font-weight: 600;
+    color: var(--text-muted); text-align: left; text-transform: uppercase; letter-spacing: 0.05em;
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text); word-break: break-word; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 15px; padding: 3px 7px; border-radius: 6px; line-height: 1; }
+  .del-btn:hover { color: var(--danger); background: var(--danger-bg); }
+
+  .loading { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 14px; }
+  .spin { display: inline-block; animation: spin 0.9s linear infinite; font-size: 22px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 520px) {
+    .row2 { grid-template-columns: 1fr; }
+    .main { padding: 1.25rem 1rem; }
+    .card { padding: 1.25rem; }
+    .summary { flex-direction: column; }
+    thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🥋</div>
+  <div>
+    <h1>Taekwondo İl İçi Seçme</h1>
+    <p>Sporcu Kayıt Sistemi</p>
+  </div>
+</header>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('form', this)">📋 Sporcu Kaydı</button>
+    <button class="tab" onclick="showTab('liste', this)">📊 Katılımcı Listesi</button>
+  </div>
+
+  <!-- FORM -->
+  <div id="tab-form" class="panel active">
+    <div class="card">
+      <div class="card-title">Sporcu Bilgilerini Girin</div>
+      <div class="field">
+        <label>Ad Soyad</label>
+        <input type="text" id="adsoyad" placeholder="Örn: Ali Yılmaz" autocomplete="off" />
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Yaş</label>
+          <input type="number" id="yas" placeholder="Örn: 17" min="5" max="80" />
+        </div>
+        <div class="field">
+          <label>Kilo (kg)</label>
+          <input type="number" id="kilo" placeholder="Örn: 62.5" min="20" max="200" step="0.5" />
+          <div class="hint">Gerçek kilonuzu girin — kategori otomatik belirlenir</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Kulüp Adı</label>
+        <input type="text" id="kulup" placeholder="Örn: Trabzon Spor Kulübü" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Telefon Numarası</label>
+        <input type="tel" id="telefon" placeholder="Örn: 0532 123 45 67" autocomplete="off" />
+      </div>
+      <button class="submit-btn" id="kaydetBtn" onclick="kaydet()">Kaydı Gönder</button>
+      <div id="toast" class="toast"></div>
+    </div>
+  </div>
+
+  <!-- LİSTE -->
+  <div id="tab-liste" class="panel">
+    <div class="list-top">
+      <h2>Kilo Kategorilerine Göre Liste</h2>
+      <div class="btn-row">
+        <button class="icon-btn" onclick="refreshListe()">🔄 Yenile</button>
+        <button class="icon-btn" onclick="exportCSV()">⬇️ CSV İndir</button>
+        <button class="icon-btn danger" onclick="tumunuSil()">🗑 Temizle</button>
+      </div>
+    </div>
+    <div id="liste-content">
+      <div class="loading"><div class="spin">⏳</div><br>Yükleniyor...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://knaqukgvxgrjmdzwljyr.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuYXF1a2d2eGdyam1kendsanlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzM4MTQsImV4cCI6MjA5ODEwOTgxNH0.G6OJ00QgHn8upK1_xvJcDE9FoB3xmlEh3Yj94abVf5w';
+  const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
+  const KILO_SIRASI = ['-30 kg','-33 kg','-37 kg','-41 kg','-45 kg','-49 kg','-53 kg','-57 kg','-61 kg','-65 kg','-73 kg','-87 kg','+87 kg'];
+
+  function kiloKategori(kg) {
+    const sinirlar = [30,33,37,41,45,49,53,57,61,65,73,87];
+    const k = parseFloat(kg);
+    for (let i = 0; i < sinirlar.length; i++) { if (k <= sinirlar[i]) return KILO_SIRASI[i]; }
+    return '+87 kg';
+  }
+
+  function showTab(t, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + t).classList.add('active');
+    btn.classList.add('active');
+    if (t === 'liste') refreshListe();
+  }
+
+  function showToast(msg, type) {
+    const el = document.getElementById('toast');
+    el.className = 'toast ' + type;
+    el.innerHTML = msg;
+    setTimeout(() => el.className = 'toast', 3500);
+  }
+
+  async function kaydet() {
+    const ad = document.getElementById('adsoyad').value.trim();
+    const yas = document.getElementById('yas').value.trim();
+    const kilo = document.getElementById('kilo').value.trim();
+    const kulup = document.getElementById('kulup').value.trim();
+    const telefon = document.getElementById('telefon').value.trim();
+
+    if (!ad || !yas || !kilo || !kulup || !telefon) { showToast('⚠️ Lütfen tüm alanları doldurun.', 'err'); return; }
+
+    const btn = document.getElementById('kaydetBtn');
+    btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+
+    const kategori = kiloKategori(kilo);
+    const body = { ad, yas: parseInt(yas), kilo: parseFloat(kilo), kategori, kulup, telefon };
+
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular', {
+        method: 'POST',
+        headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) { const e = await res.text(); throw new Error(e); }
+
+      document.getElementById('adsoyad').value = '';
+      document.getElementById('yas').value = '';
+      document.getElementById('kilo').value = '';
+      document.getElementById('kulup').value = '';
+      document.getElementById('telefon').value = '';
+      showToast('✅ Kayıt eklendi! Kategori: <strong>' + kategori + '</strong>', 'ok');
+    } catch(e) {
+      showToast('❌ Hata: ' + e.message, 'err');
+    }
+
+    btn.disabled = false; btn.textContent = 'Kaydı Gönder';
+  }
+
+  let _sporcular = [];
+
+  async function refreshListe() {
+    document.getElementById('liste-content').innerHTML = '<div class="loading"><div class="spin">⏳</div><br>Yükleniyor...</div>';
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?select=*&order=created_at.asc', { headers: HEADERS });
+      if (!res.ok) throw new Error(await res.text());
+      _sporcular = await res.json();
+      renderListe();
+    } catch(e) {
+      document.getElementById('liste-content').innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>Veriler yüklenemedi.<br>' + e.message + '</p></div>';
+    }
+  }
+
+  function renderListe() {
+    const el = document.getElementById('liste-content');
+    if (!_sporcular.length) {
+      el.innerHTML = '<div class="empty"><div class="icon">👥</div><p>Henüz kayıt yok.<br>Kayıt sekmesinden sporcu ekleyebilirsiniz.</p></div>';
+      return;
+    }
+
+    const grouped = {};
+    _sporcular.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
+    const aktif = KILO_SIRASI.filter(k => grouped[k]);
+
+    let html = `<div class="summary">
+      <div class="stat"><div class="stat-label">Toplam Sporcu</div><div class="stat-val">${_sporcular.length}</div></div>
+      <div class="stat"><div class="stat-label">Aktif Kategori</div><div class="stat-val">${aktif.length}</div></div>
+    </div>`;
+
+    aktif.forEach(kat => {
+      const grup = grouped[kat].sort((a,b) => a.kilo - b.kilo);
+      html += `<div class="cat-block">
+        <div class="cat-title">
+          <span class="kat-adi">🏷 ${kat}</span>
+          <span class="cat-badge">${grup.length} sporcu</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th style="width:28%">Ad Soyad</th>
+            <th style="width:8%">Yaş</th>
+            <th style="width:10%">Kilo</th>
+            <th style="width:28%">Kulüp</th>
+            <th style="width:18%">Telefon</th>
+            <th style="width:8%"></th>
+          </tr></thead>
+          <tbody>${grup.map(s => `<tr>
+            <td>${s.ad}</td>
+            <td>${s.yas}</td>
+            <td>${s.kilo} kg</td>
+            <td>${s.kulup}</td>
+            <td>${s.telefon || '-'}</td>
+            <td><button class="del-btn" onclick="sil(${s.id})" title="Sil">🗑</button></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+    });
+
+    el.innerHTML = html;
+  }
+
+  async function sil(id) {
+    if (!confirm('Bu kaydı silmek istiyor musun?')) return;
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?id=eq.' + id, { method: 'DELETE', headers: HEADERS });
+      if (!res.ok) throw new Error(await res.text());
+      await refreshListe();
+    } catch(e) { alert('Silinemedi: ' + e.message); }
+  }
+
+  async function tumunuSil() {
+    if (!confirm('Tüm kayıtları silmek istiyor musun? Bu işlem geri alınamaz!')) return;
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?id=gt.0', { method: 'DELETE', headers: HEADERS });
+      if (!res.ok) throw new Error(await res.text());
+      await refreshListe();
+    } catch(e) { alert('Silinemedi: ' + e.message); }
+  }
+
+  function exportCSV() {
+    if (!_sporcular.length) { alert('İndirilecek kayıt yok.'); return; }
+    const sorted = [..._sporcular].sort((a,b) => KILO_SIRASI.indexOf(a.kategori) - KILO_SIRASI.indexOf(b.kategori) || a.kilo - b.kilo);
+    let csv = 'Kategori,Ad Soyad,Yaş,Kilo (kg),Kulüp,Telefon\n';
+    sorted.forEach(s => { csv += `"${s.kategori}","${s.ad}",${s.yas},${s.kilo},"${s.kulup}","${s.telefon || ''}"\n`; });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tkd_secme_listesi.csv'; a.click();
+  }
+
+  // Sayfa açılınca liste sekmesindeyse yükle
+  refreshListe();
+</script>
+</body>
+</html>
