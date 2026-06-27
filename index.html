@@ -2852,44 +2852,108 @@ function renderBracket(rounds) {
 // ---- BRACKET WORD İNDİR ----
 async function exportBracketWord() {
   if (!_bracket) return;
-  const { Document, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, HeadingLevel, Packer } = window.docx;
-  const borderStyle = { style: BorderStyle.SINGLE, size: 4, color: '999999' };
-  const cellBorder = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+  const { Document, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, HeadingLevel, Packer, ShadingType } = window.docx;
+
+  const brd = (c) => ({ style: BorderStyle.SINGLE, size: 6, color: c||'3949AB' });
+  const cb = (c) => ({ top:brd(c), bottom:brd(c), left:brd(c), right:brd(c) });
+
+  function hCell(text, w) {
+    return new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text, bold:true, color:'FFFFFF', size:22 })], alignment: AlignmentType.CENTER })],
+      shading: { fill:'1a237e' }, borders: cb('1a237e'), width:{ size:w, type:WidthType.PERCENTAGE }, verticalAlign:'center'
+    });
+  }
+  function dCell(text, w, shade, bold, color) {
+    return new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text:String(text||''), bold:!!bold, size:20, color:color||'111111' })], alignment: AlignmentType.CENTER })],
+      shading: { fill: shade ? 'e8eaf6' : 'FFFFFF' }, borders: cb('9fa8da'),
+      width:{ size:w, type:WidthType.PERCENTAGE }, verticalAlign:'center'
+    });
+  }
+
+  // Maçlara global numara ver
+  let macNo = 1;
+  const macNums = _bracket.map(round => round.matches.map(() => macNo++));
+
   const children = [];
 
-  children.push(new Paragraph({ text: 'TAEKWONDO İL İÇİ SEÇME', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }));
-  children.push(new Paragraph({ text: _secilenKat + ' — Turnuva Fikstürü', heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
-  children.push(new Paragraph({ text: 'Tarih: ' + new Date().toLocaleDateString('tr-TR', {day:'2-digit',month:'long',year:'numeric'}), alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
+  children.push(new Paragraph({
+    children:[new TextRun({ text:'TAEKWONDO İL İÇİ SEÇME', bold:true, size:32, color:'1a237e' })],
+    alignment: AlignmentType.CENTER, spacing:{ after:100 }
+  }));
+  children.push(new Paragraph({
+    children:[new TextRun({ text: _secilenKat + ' KATEGORİSİ — TURNUVA FİKSTÜRÜ', bold:true, size:26, color:'3949AB' })],
+    alignment: AlignmentType.CENTER, spacing:{ after:100 }
+  }));
+  children.push(new Paragraph({
+    children:[new TextRun({ text: new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'}), size:20, color:'666666' })],
+    alignment: AlignmentType.CENTER, spacing:{ after:600 }
+  }));
 
-  _bracket.forEach(round => {
-    children.push(new Paragraph({ text: round.name, heading: HeadingLevel.HEADING_3, spacing: { before: 400, after: 200 } }));
-    const rows = [new TableRow({ children: [
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Sporcu 1', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Güç Puanı', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 15, type: WidthType.PERCENTAGE } }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'VS', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 5, type: WidthType.PERCENTAGE } }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Sporcu 2', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
-    ]})];
+  _bracket.forEach((round, ri) => {
+    const nums = macNums[ri];
+    const prevNums = ri > 0 ? macNums[ri-1] : null;
+
+    children.push(new Paragraph({
+      children:[new TextRun({ text:'  ' + round.name.toUpperCase(), bold:true, size:24, color:'FFFFFF' })],
+      shading:{ fill:'1a237e' }, spacing:{ before:500, after:0 }
+    }));
+
+    const rows = [];
+    rows.push(new TableRow({
+      children:[hCell('MAÇ NO',10), hCell('SPORCU 1',40), hCell('VS',5), hCell('SPORCU 2',40), hCell('GALİP',5)],
+      tableHeader:true
+    }));
+
     round.matches.forEach((m, i) => {
+      const no = nums[i];
       const shade = i % 2 === 0;
-      const p1 = m.tbd ? 'Önceki Maç Galibi' : (m.p1 ? m.p1.ad : 'BYE (Direkt Geçiş)');
-      const p1g = m.tbd ? '-' : (m.p1 ? String(m.p1.guc) : '-');
-      const p2 = m.tbd ? 'Önceki Maç Galibi' : (m.p2 ? m.p2.ad : 'BYE (Direkt Geçiş)');
-      rows.push(new TableRow({ children: [
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p1, size: 18 })], alignment: AlignmentType.LEFT })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p1g, size: 18, bold: true })], alignment: AlignmentType.CENTER })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 15, type: WidthType.PERCENTAGE } }),
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'VS', size: 18, bold: true, color: '3949AB' })], alignment: AlignmentType.CENTER })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 5, type: WidthType.PERCENTAGE } }),
-        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p2, size: 18 })], alignment: AlignmentType.LEFT })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
+      let p1text, p2text;
+      if (m.tbd) {
+        const s1 = prevNums && prevNums[i*2] != null ? 'Maç ' + prevNums[i*2] + ' Galibi' : '?';
+        const s2 = prevNums && prevNums[i*2+1] != null ? 'Maç ' + prevNums[i*2+1] + ' Galibi' : '?';
+        p1text = s1; p2text = s2;
+      } else {
+        p1text = m.p1 ? m.p1.ad : 'BYE - Direkt Geçiş';
+        p2text = m.p2 ? m.p2.ad : 'BYE - Direkt Geçiş';
+      }
+      rows.push(new TableRow({ children:[
+        dCell('Maç ' + no, 10, shade, true, '3949AB'),
+        dCell(p1text, 40, shade, !m.tbd && !!m.p1),
+        dCell('VS', 5, shade, true, 'c62828'),
+        dCell(p2text, 40, shade, !m.tbd && !!m.p2),
+        dCell('', 5, shade),
       ]}));
     });
-    children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
-    children.push(new Paragraph({ text: '', spacing: { after: 300 } }));
+
+    children.push(new Table({ rows, width:{ size:100, type:WidthType.PERCENTAGE } }));
+
+    if (ri < _bracket.length - 1) {
+      const nextNums = macNums[ri+1];
+      const aciklama = _bracket[ri+1].matches.map((_, ni) => {
+        const a = nums[ni*2] != null ? 'Maç '+nums[ni*2] : '?';
+        const b = nums[ni*2+1] != null ? 'Maç '+nums[ni*2+1] : '?';
+        return a + ' ve ' + b + ' galibi → Maç ' + nextNums[ni];
+      }).join('     |     ');
+      children.push(new Paragraph({
+        children:[new TextRun({ text:'⟶ Bir sonraki tura geçiş: ' + aciklama, size:17, color:'555555', italics:true })],
+        spacing:{ before:150, after:50 }
+      }));
+    }
   });
 
-  const doc = new Document({ sections: [{ children }] });
-  const blob = await Packer.toBlob(doc);
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tkd_fikstur_' + _secilenKat.replace(/[^a-z0-9]/gi,'_') + '.docx'; a.click();
-}
+  children.push(new Paragraph({
+    children:[new TextRun({ text:'* BYE: Rakipsiz sporcu doğrudan bir sonraki tura geçer.', size:17, color:'888888', italics:true })],
+    spacing:{ before:600 }
+  }));
 
+  const doc = new Document({ sections:[{ children }] });
+  const blob = await Packer.toBlob(doc);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tkd_fikstur_' + _secilenKat.replace(/[^a-z0-9]/gi,'_') + '.docx';
+  a.click();
+}
 refreshListe();
 </script>
 </body>
