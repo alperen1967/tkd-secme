@@ -189,7 +189,10 @@
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + t).classList.add('active');
     btn.classList.add('active');
-    if (t === 'liste') refreshListe();
+    if (t === 'liste') {
+      if (!sifreKontrol()) { showTab('form', document.querySelectorAll('.tab')[0]); return; }
+      refreshListe();
+    }
   }
 
   function showToast(msg, type) {
@@ -304,6 +307,17 @@
       if (!res.ok) throw new Error(await res.text());
       await refreshListe();
     } catch(e) { alert('Silinemedi: ' + e.message); }
+  }
+
+  const SIFRE = 'Erdaymır1361';
+  let sifreliGiris = false;
+
+  function sifreKontrol() {
+    if (sifreliGiris) return true;
+    const girilen = prompt('Katılımcı listesi için şifre gereklidir:');
+    if (girilen === SIFRE) { sifreliGiris = true; return true; }
+    if (girilen !== null) alert('Hatalı şifre!');
+    return false;
   }
 
   function cellStyle(bold, bgRGB, fontRGB, fontSize, hAlign) {
