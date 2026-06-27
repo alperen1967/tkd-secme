@@ -2671,11 +2671,11 @@ async function exportWord() {
   aktif.forEach(kat => {
     const grup = grouped[kat].sort((a,b) => a.kilo - b.kilo);
     children.push(new Paragraph({ text: kat + '  (' + grup.length + ' sporcu)', heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }));
-    const rows = [new TableRow({ children: [hCell('Ad Soyad',25),hCell('Doğum Tarihi',15),hCell('Kilo',10),hCell('Kulüp',25),hCell('Okul',25)] })];
+    const rows = [new TableRow({ children: [hCell('Ad Soyad',22),hCell('Doğum Tarihi',14),hCell('Kilo',9),hCell('Kulüp',20),hCell('Okul',20),hCell('TC Kimlik',15)] })];
     grup.forEach((s, i) => {
       rows.push(new TableRow({ children: [
         dCell(s.ad,28,i%2),dCell(formatTarih(s.dogum_tarihi),16,i%2),
-        dCell(s.kilo+' kg',10,i%2),dCell(s.kulup,25,i%2),dCell(s.okul||'-',25,i%2)
+        dCell(s.kilo+' kg',9,i%2),dCell(s.kulup,20,i%2),dCell(s.okul||'-',20,i%2),dCell(s.tc_kimlik||'-',15,i%2)
       ]}));
     });
     children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
