@@ -2453,8 +2453,12 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
         <input type="text" id="kulup" placeholder="Örn: Trabzon Spor Kulübü" autocomplete="off" />
       </div>
       <div class="field">
-        <label>Telefon Numarası</label>
-        <input type="tel" id="telefon" placeholder="Örn: 0532 123 45 67" autocomplete="off" />
+        <label>Okul Adı</label>
+        <input type="text" id="okul" placeholder="Örn: Trabzon Anadolu Lisesi" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>TC Kimlik No</label>
+        <input type="text" id="tc_kimlik" placeholder="Örn: 12345678901" maxlength="11" autocomplete="off" />
       </div>
       <button class="submit-btn" id="kaydetBtn" onclick="kaydet()">Kaydı Gönder</button>
       <div id="toast" class="toast"></div>
@@ -2563,18 +2567,20 @@ async function kaydet() {
   const dogum_tarihi = document.getElementById('dogum_tarihi').value;
   const kilo = document.getElementById('kilo').value.trim();
   const kulup = document.getElementById('kulup').value.trim();
-  const telefon = document.getElementById('telefon').value.trim();
-  if (!ad || !dogum_tarihi || !kilo || !kulup || !telefon) { showToast('⚠️ Lütfen tüm alanları doldurun.', 'err'); return; }
+  const okul = document.getElementById('okul').value.trim();
+  const tc_kimlik = document.getElementById('tc_kimlik').value.trim();
+  if (!ad || !dogum_tarihi || !kilo || !kulup || !okul || !tc_kimlik) { showToast('⚠️ Lütfen tüm alanları doldurun.', 'err'); return; }
+  if (tc_kimlik.length !== 11 || !/^[0-9]+$/.test(tc_kimlik)) { showToast('⚠️ TC Kimlik No 11 haneli sayı olmalıdır.', 'err'); return; }
   const btn = document.getElementById('kaydetBtn');
   btn.disabled = true; btn.textContent = 'Kaydediliyor...';
   const kategori = kiloKategori(kilo);
-  const body = { ad, dogum_tarihi, kilo: parseFloat(kilo), kategori, kulup, telefon };
+  const body = { ad, dogum_tarihi, kilo: parseFloat(kilo), kategori, kulup, okul, tc_kimlik };
   try {
     const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular', {
       method: 'POST', headers: { ...HEADERS, 'Prefer': 'return=minimal' }, body: JSON.stringify(body)
     });
     if (!res.ok) throw new Error(await res.text());
-    ['adsoyad','dogum_tarihi','kilo','kulup','telefon'].forEach(id => document.getElementById(id).value = '');
+    ['adsoyad','dogum_tarihi','kilo','kulup','okul','tc_kimlik'].forEach(id => document.getElementById(id).value = '');
     showToast('✅ Kayıt eklendi! Kategori: <strong>' + kategori + '</strong>', 'ok');
   } catch(e) { showToast('❌ Hata: ' + e.message, 'err'); }
   btn.disabled = false; btn.textContent = 'Kaydı Gönder';
@@ -2607,12 +2613,12 @@ function renderListe() {
     html += `<div class="cat-block">
       <div class="cat-title"><span class="kat-adi">🏷 ${kat}</span><span class="cat-badge">${grup.length} sporcu</span></div>
       <table><thead><tr>
-        <th style="width:24%">Ad Soyad</th><th style="width:14%">Doğum Tarihi</th><th style="width:7%">Yaş</th>
-        <th style="width:10%">Kilo</th><th style="width:24%">Kulüp</th><th style="width:16%">Telefon</th><th style="width:5%"></th>
+        <th style="width:20%">Ad Soyad</th><th style="width:12%">Doğum Tarihi</th><th style="width:6%">Yaş</th>
+        <th style="width:8%">Kilo</th><th style="width:18%">Kulüp</th><th style="width:18%">Okul</th><th style="width:12%">TC Kimlik</th><th style="width:6%"></th>
       </tr></thead><tbody>
       ${grup.map(s => `<tr>
         <td>${s.ad}</td><td>${formatTarih(s.dogum_tarihi)}</td><td>${yas(s.dogum_tarihi)}</td>
-        <td>${s.kilo} kg</td><td>${s.kulup}</td><td>${s.telefon||'-'}</td>
+        <td>${s.kilo} kg</td><td>${s.kulup}</td><td>${s.okul||'-'}</td><td>${s.tc_kimlik||'-'}</td>
         <td><button class="del-btn" onclick="sil(${s.id})">🗑</button></td>
       </tr>`).join('')}
       </tbody></table></div>`;
@@ -2665,11 +2671,11 @@ async function exportWord() {
   aktif.forEach(kat => {
     const grup = grouped[kat].sort((a,b) => a.kilo - b.kilo);
     children.push(new Paragraph({ text: kat + '  (' + grup.length + ' sporcu)', heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }));
-    const rows = [new TableRow({ children: [hCell('Ad Soyad',28),hCell('Doğum Tarihi',16),hCell('Yaş',8),hCell('Kilo',10),hCell('Kulüp',24),hCell('Telefon',14)] })];
+    const rows = [new TableRow({ children: [hCell('Ad Soyad',28),hCell('Doğum Tarihi',16),hCell('Kilo',10),hCell('Kulüp',24),hCell('Okul',22)] })];
     grup.forEach((s, i) => {
       rows.push(new TableRow({ children: [
-        dCell(s.ad,28,i%2),dCell(formatTarih(s.dogum_tarihi),16,i%2),dCell(yas(s.dogum_tarihi),8,i%2),
-        dCell(s.kilo+' kg',10,i%2),dCell(s.kulup,24,i%2),dCell(s.telefon,14,i%2)
+        dCell(s.ad,28,i%2),dCell(formatTarih(s.dogum_tarihi),16,i%2),
+        dCell(s.kilo+' kg',10,i%2),dCell(s.kulup,24,i%2),dCell(s.okul||'-',22,i%2)
       ]}));
     });
     children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
