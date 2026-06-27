@@ -5,112 +5,120 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Taekwondo İl İçi Seçme Kayıt Sistemi</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.umd.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #21253a;
+  --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15);
+  --text: #f0f2ff; --text-muted: #8891b0;
+  --accent: #4f6ef7; --accent-hover: #3d5ce8;
+  --accent-bg: rgba(79,110,247,0.12); --accent-border: rgba(79,110,247,0.35);
+  --success: #22c55e; --success-bg: rgba(34,197,94,0.12);
+  --danger: #ef4444; --danger-bg: rgba(239,68,68,0.1);
+  --gold: #f59e0b; --gold-bg: rgba(245,158,11,0.12);
+  --radius: 10px;
+}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 14px; }
+.logo { width: 42px; height: 42px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+header h1 { font-size: 17px; font-weight: 600; }
+header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.main { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem; }
+.tabs { display: flex; gap: 6px; margin-bottom: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; }
+.tab { flex: 1; padding: 9px 6px; border: none; border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+.tab.active { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+.tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+.panel { display: none; }
+.panel.active { display: block; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 1.5rem; }
+.field { margin-bottom: 1.1rem; }
+.field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 7px; font-weight: 500; }
+.field input, .field select { width: 100%; padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.15); }
+.field input::placeholder { color: var(--text-muted); }
+.field select option { background: var(--surface2); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.submit-btn { width: 100%; padding: 11px; margin-top: 6px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.submit-btn:hover { background: var(--accent-hover); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.toast { display: none; margin-top: 14px; padding: 11px 15px; border-radius: var(--radius); font-size: 13px; font-weight: 500; }
+.toast.ok { display: block; background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+.toast.err { display: block; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
+.list-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
+.list-top h2 { font-size: 15px; font-weight: 600; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.icon-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.icon-btn:hover { background: var(--surface2); color: var(--text); }
+.icon-btn.danger { border-color: rgba(239,68,68,0.4); color: var(--danger); }
+.icon-btn.danger:hover { background: var(--danger-bg); }
+.summary { display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 120px; }
+.stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-val { font-size: 26px; font-weight: 700; margin-top: 2px; }
+.empty { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+.empty .icon { font-size: 44px; margin-bottom: 14px; opacity: 0.3; }
+.empty p { font-size: 14px; }
+.cat-block { margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.cat-title { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--accent-bg); border-bottom: 1px solid var(--accent-border); }
+.cat-title .kat-adi { font-weight: 600; font-size: 14px; color: var(--accent); }
+.cat-badge { font-size: 11px; font-weight: 600; background: var(--accent); color: #fff; padding: 2px 9px; border-radius: 20px; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+thead th { padding: 9px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: left; text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface2); border-bottom: 1px solid var(--border); }
+tbody td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text); word-break: break-word; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 15px; padding: 3px 7px; border-radius: 6px; }
+.del-btn:hover { color: var(--danger); background: var(--danger-bg); }
+.loading { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 14px; }
+.spin { display: inline-block; animation: spin 0.9s linear infinite; font-size: 22px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #21253a;
-    --border: rgba(255,255,255,0.08);
-    --border-strong: rgba(255,255,255,0.15);
-    --text: #f0f2ff;
-    --text-muted: #8891b0;
-    --accent: #4f6ef7;
-    --accent-hover: #3d5ce8;
-    --accent-bg: rgba(79,110,247,0.12);
-    --accent-border: rgba(79,110,247,0.35);
-    --success: #22c55e;
-    --success-bg: rgba(34,197,94,0.12);
-    --danger: #ef4444;
-    --danger-bg: rgba(239,68,68,0.1);
-    --radius: 10px;
-  }
+/* KURA STİLLERİ */
+.kura-header { margin-bottom: 1.5rem; }
+.kura-header h2 { font-size: 15px; font-weight: 600; margin-bottom: 1rem; }
+.kat-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.kat-btn { padding: 10px 8px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface2); color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center; }
+.kat-btn:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-bg); }
+.kat-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.kat-btn.disabled { opacity: 0.3; cursor: not-allowed; }
+.guc-table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; }
+.guc-table th { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: left; text-transform: uppercase; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.guc-table td { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+.guc-table tr:last-child td { border-bottom: none; }
+.guc-input { width: 70px; padding: 5px 8px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 6px; color: var(--text); font-size: 13px; text-align: center; outline: none; }
+.guc-input:focus { border-color: var(--accent); }
+.kura-btn { padding: 11px 24px; background: var(--gold); color: #000; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+.kura-btn:hover { background: #d97706; }
 
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+/* TURNUVA AĞACI */
+.bracket-wrap { overflow-x: auto; padding: 1rem 0; }
+.bracket { display: flex; gap: 0; align-items: stretch; min-width: max-content; }
+.round { display: flex; flex-direction: column; justify-content: space-around; min-width: 180px; }
+.round-title { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 0 14px; }
+.matches { display: flex; flex-direction: column; justify-content: space-around; flex: 1; gap: 0; }
+.match-wrap { display: flex; align-items: center; flex: 1; }
+.match { background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; width: 160px; }
+.match-player { padding: 8px 10px; font-size: 12px; font-weight: 500; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+.match-player:last-child { border-bottom: none; }
+.match-player.bye { color: var(--text-muted); font-style: italic; font-weight: 400; }
+.seed-badge { font-size: 10px; background: var(--accent-bg); color: var(--accent); padding: 1px 5px; border-radius: 4px; flex-shrink: 0; }
+.connector { width: 24px; position: relative; }
+.connector::before { content: ''; position: absolute; top: 25%; bottom: 25%; right: 0; width: 1px; background: var(--border-strong); }
+.connector::after { content: ''; position: absolute; top: 50%; right: 0; width: 24px; height: 1px; background: var(--border-strong); }
 
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 14px; }
-  .logo { width: 42px; height: 42px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-  header h1 { font-size: 17px; font-weight: 600; color: var(--text); }
-  header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-  .main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem; }
-
-  .tabs { display: flex; gap: 6px; margin-bottom: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; }
-  .tab { flex: 1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 14px; cursor: pointer; transition: all 0.15s; font-weight: 500; }
-  .tab.active { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
-  .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
-
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; }
-  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 1.5rem; color: var(--text); }
-
-  .field { margin-bottom: 1.1rem; }
-  .field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 7px; font-weight: 500; }
-  .field input { width: 100%; padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
-  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.15); }
-  .field input::placeholder { color: var(--text-muted); }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
-
-  .submit-btn { width: 100%; padding: 11px; margin-top: 6px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-  .submit-btn:hover { background: var(--accent-hover); }
-  .submit-btn:active { transform: scale(0.99); }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .toast { display: none; margin-top: 14px; padding: 11px 15px; border-radius: var(--radius); font-size: 13px; font-weight: 500; }
-  .toast.ok { display: block; background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
-  .toast.err { display: block; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
-
-  .list-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
-  .list-top h2 { font-size: 15px; font-weight: 600; }
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-
-  .icon-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
-  .icon-btn:hover { background: var(--surface2); color: var(--text); }
-  .icon-btn.danger { border-color: rgba(239,68,68,0.4); color: var(--danger); }
-  .icon-btn.danger:hover { background: var(--danger-bg); }
-
-  .summary { display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 120px; }
-  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-  .stat-val { font-size: 26px; font-weight: 700; color: var(--text); margin-top: 2px; }
-
-  .empty { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
-  .empty .icon { font-size: 44px; margin-bottom: 14px; opacity: 0.3; }
-  .empty p { font-size: 14px; }
-
-  .cat-block { margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .cat-title { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--accent-bg); border-bottom: 1px solid var(--accent-border); }
-  .cat-title .kat-adi { font-weight: 600; font-size: 14px; color: var(--accent); }
-  .cat-badge { font-size: 11px; font-weight: 600; background: var(--accent); color: #fff; padding: 2px 9px; border-radius: 20px; }
-
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  thead th { padding: 9px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: left; text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface2); border-bottom: 1px solid var(--border); }
-  tbody td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text); word-break: break-word; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 15px; padding: 3px 7px; border-radius: 6px; line-height: 1; }
-  .del-btn:hover { color: var(--danger); background: var(--danger-bg); }
-
-  .loading { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 14px; }
-  .spin { display: inline-block; animation: spin 0.9s linear infinite; font-size: 22px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 520px) {
-    .row2 { grid-template-columns: 1fr; }
-    .main { padding: 1.25rem 1rem; }
-    .card { padding: 1.25rem; }
-    .summary { flex-direction: column; }
-    thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
-  }
+@media (max-width: 520px) {
+  .row2 { grid-template-columns: 1fr; }
+  .main { padding: 1.25rem 1rem; }
+  .card { padding: 1.25rem; }
+  .summary { flex-direction: column; }
+  .kat-select-grid { grid-template-columns: repeat(3, 1fr); }
+}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">🥋</div>
   <div>
@@ -121,10 +129,12 @@
 
 <div class="main">
   <div class="tabs">
-    <button class="tab active" onclick="showTab('form', this)">📋 Sporcu Kaydı</button>
-    <button class="tab" onclick="showTab('liste', this)">📊 Katılımcı Listesi</button>
+    <button class="tab active" onclick="showTab('form',this)">📋 Sporcu Kaydı</button>
+    <button class="tab" onclick="showTab('liste',this)">📊 Katılımcı Listesi</button>
+    <button class="tab" onclick="showTab('kura',this)">🎯 Kura Sistemi</button>
   </div>
 
+  <!-- FORM -->
   <div id="tab-form" class="panel active">
     <div class="card">
       <div class="card-title">Sporcu Bilgilerini Girin</div>
@@ -134,8 +144,8 @@
       </div>
       <div class="row2">
         <div class="field">
-          <label>Yaş</label>
-          <input type="number" id="yas" placeholder="Örn: 17" min="5" max="80" />
+          <label>Doğum Tarihi</label>
+          <input type="date" id="dogum_tarihi" />
         </div>
         <div class="field">
           <label>Kilo (kg)</label>
@@ -156,282 +166,436 @@
     </div>
   </div>
 
+  <!-- LİSTE -->
   <div id="tab-liste" class="panel">
     <div class="list-top">
       <h2>Kilo Kategorilerine Göre Liste</h2>
       <div class="btn-row">
         <button class="icon-btn" onclick="refreshListe()">🔄 Yenile</button>
-        <button class="icon-btn" onclick="exportExcel()">📥 Excel İndir</button>
+        <button class="icon-btn" onclick="exportWord()">📄 Word İndir</button>
         <button class="icon-btn danger" onclick="tumunuSil()">🗑 Temizle</button>
       </div>
     </div>
-    <div id="liste-content">
-      <div class="loading"><div class="spin">⏳</div><br>Yükleniyor...</div>
+    <div id="liste-content"><div class="loading"><div class="spin">⏳</div><br>Yükleniyor...</div></div>
+  </div>
+
+  <!-- KURA -->
+  <div id="tab-kura" class="panel">
+    <div class="card">
+      <div class="kura-header">
+        <h2>🎯 Kura Sistemi</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem;">Kilo kategorisi seçin, güç puanlarını girin ve kura çekin.</p>
+        <div id="kat-grid" class="kat-select-grid"></div>
+      </div>
+      <div id="kura-sporcu-alan" style="display:none">
+        <div id="kura-sporcu-tablo"></div>
+        <button class="kura-btn" onclick="kuraKur()">🎲 Kura Çek</button>
+      </div>
+      <div id="bracket-alan" style="display:none;margin-top:2rem;">
+        <div class="list-top" style="margin-bottom:1rem;">
+          <h2 id="bracket-baslik"></h2>
+          <button class="icon-btn" onclick="exportBracketWord()">📄 Word İndir</button>
+        </div>
+        <div class="bracket-wrap">
+          <div id="bracket-content" class="bracket"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://knaqukgvxgrjmdzwljyr.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuYXF1a2d2eGdyam1kendsanlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzM4MTQsImV4cCI6MjA5ODEwOTgxNH0.G6OJ00QgHn8upK1_xvJcDE9FoB3xmlEh3Yj94abVf5w';
-  const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
-  const KILO_SIRASI = ['-30 kg','-33 kg','-37 kg','-41 kg','-45 kg','-49 kg','-53 kg','-57 kg','-61 kg','-65 kg','-73 kg','-87 kg','+87 kg'];
+const SUPABASE_URL = 'https://knaqukgvxgrjmdzwljyr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuYXF1a2d2eGdyam1kendsanlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzM4MTQsImV4cCI6MjA5ODEwOTgxNH0.G6OJ00QgHn8upK1_xvJcDE9FoB3xmlEh3Yj94abVf5w';
+const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+const KILO_SIRASI = ['-30 kg','-33 kg','-37 kg','-41 kg','-45 kg','-49 kg','-53 kg','-57 kg','-61 kg','-65 kg','-73 kg','-87 kg','+87 kg'];
+const SIFRE = 'Erdaymır1361';
+let sifreliGiris = false;
+let _sporcular = [];
+let _secilenKat = null;
+let _bracket = null;
 
-  function kiloKategori(kg) {
-    const sinirlar = [30,33,37,41,45,49,53,57,61,65,73,87];
-    const k = parseFloat(kg);
-    for (let i = 0; i < sinirlar.length; i++) { if (k <= sinirlar[i]) return KILO_SIRASI[i]; }
-    return '+87 kg';
+function kiloKategori(kg) {
+  const sinirlar = [30,33,37,41,45,49,53,57,61,65,73,87];
+  const k = parseFloat(kg);
+  for (let i = 0; i < sinirlar.length; i++) { if (k <= sinirlar[i]) return KILO_SIRASI[i]; }
+  return '+87 kg';
+}
+
+function formatTarih(dt) {
+  if (!dt) return '-';
+  const [y,m,d] = dt.split('-');
+  return d + '.' + m + '.' + y;
+}
+
+function yas(dogum) {
+  if (!dogum) return '-';
+  const bugun = new Date();
+  const d = new Date(dogum);
+  let y = bugun.getFullYear() - d.getFullYear();
+  const m = bugun.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && bugun.getDate() < d.getDate())) y--;
+  return y;
+}
+
+function sifreKontrol() {
+  if (sifreliGiris) return true;
+  const girilen = prompt('Bu bölüme erişmek için şifre gereklidir:');
+  if (girilen === SIFRE) { sifreliGiris = true; return true; }
+  if (girilen !== null) alert('Hatalı şifre!');
+  return false;
+}
+
+function showTab(t, btn) {
+  if ((t === 'liste' || t === 'kura') && !sifreKontrol()) return;
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  btn.classList.add('active');
+  if (t === 'liste') refreshListe();
+  if (t === 'kura') initKura();
+}
+
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.className = 'toast ' + type;
+  el.innerHTML = msg;
+  setTimeout(() => el.className = 'toast', 3500);
+}
+
+async function kaydet() {
+  const ad = document.getElementById('adsoyad').value.trim();
+  const dogum_tarihi = document.getElementById('dogum_tarihi').value;
+  const kilo = document.getElementById('kilo').value.trim();
+  const kulup = document.getElementById('kulup').value.trim();
+  const telefon = document.getElementById('telefon').value.trim();
+  if (!ad || !dogum_tarihi || !kilo || !kulup || !telefon) { showToast('⚠️ Lütfen tüm alanları doldurun.', 'err'); return; }
+  const btn = document.getElementById('kaydetBtn');
+  btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+  const kategori = kiloKategori(kilo);
+  const body = { ad, dogum_tarihi, kilo: parseFloat(kilo), kategori, kulup, telefon };
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular', {
+      method: 'POST', headers: { ...HEADERS, 'Prefer': 'return=minimal' }, body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    ['adsoyad','dogum_tarihi','kilo','kulup','telefon'].forEach(id => document.getElementById(id).value = '');
+    showToast('✅ Kayıt eklendi! Kategori: <strong>' + kategori + '</strong>', 'ok');
+  } catch(e) { showToast('❌ Hata: ' + e.message, 'err'); }
+  btn.disabled = false; btn.textContent = 'Kaydı Gönder';
+}
+
+async function refreshListe() {
+  document.getElementById('liste-content').innerHTML = '<div class="loading"><div class="spin">⏳</div><br>Yükleniyor...</div>';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?select=*&order=created_at.asc', { headers: HEADERS });
+    if (!res.ok) throw new Error(await res.text());
+    _sporcular = await res.json();
+    renderListe();
+  } catch(e) {
+    document.getElementById('liste-content').innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>Veriler yüklenemedi.<br>' + e.message + '</p></div>';
+  }
+}
+
+function renderListe() {
+  const el = document.getElementById('liste-content');
+  if (!_sporcular.length) { el.innerHTML = '<div class="empty"><div class="icon">👥</div><p>Henüz kayıt yok.</p></div>'; return; }
+  const grouped = {};
+  _sporcular.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
+  const aktif = KILO_SIRASI.filter(k => grouped[k]);
+  let html = `<div class="summary">
+    <div class="stat"><div class="stat-label">Toplam Sporcu</div><div class="stat-val">${_sporcular.length}</div></div>
+    <div class="stat"><div class="stat-label">Aktif Kategori</div><div class="stat-val">${aktif.length}</div></div>
+  </div>`;
+  aktif.forEach(kat => {
+    const grup = grouped[kat].sort((a,b) => a.kilo - b.kilo);
+    html += `<div class="cat-block">
+      <div class="cat-title"><span class="kat-adi">🏷 ${kat}</span><span class="cat-badge">${grup.length} sporcu</span></div>
+      <table><thead><tr>
+        <th style="width:24%">Ad Soyad</th><th style="width:14%">Doğum Tarihi</th><th style="width:7%">Yaş</th>
+        <th style="width:10%">Kilo</th><th style="width:24%">Kulüp</th><th style="width:16%">Telefon</th><th style="width:5%"></th>
+      </tr></thead><tbody>
+      ${grup.map(s => `<tr>
+        <td>${s.ad}</td><td>${formatTarih(s.dogum_tarihi)}</td><td>${yas(s.dogum_tarihi)}</td>
+        <td>${s.kilo} kg</td><td>${s.kulup}</td><td>${s.telefon||'-'}</td>
+        <td><button class="del-btn" onclick="sil(${s.id})">🗑</button></td>
+      </tr>`).join('')}
+      </tbody></table></div>`;
+  });
+  el.innerHTML = html;
+}
+
+async function sil(id) {
+  if (!confirm('Bu kaydı silmek istiyor musun?')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?id=eq.' + id, { method: 'DELETE', headers: HEADERS });
+    if (!res.ok) throw new Error(await res.text());
+    await refreshListe();
+  } catch(e) { alert('Silinemedi: ' + e.message); }
+}
+
+async function tumunuSil() {
+  if (!confirm('Tüm kayıtları silmek istiyor musun? Bu işlem geri alınamaz!')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?id=gt.0', { method: 'DELETE', headers: HEADERS });
+    if (!res.ok) throw new Error(await res.text());
+    await refreshListe();
+  } catch(e) { alert('Silinemedi: ' + e.message); }
+}
+
+// ---- WORD İNDİR ----
+async function exportWord() {
+  if (!_sporcular.length) { alert('İndirilecek kayıt yok.'); return; }
+  const { Document, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, HeadingLevel, Packer } = docx;
+  const grouped = {};
+  _sporcular.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
+  const aktif = KILO_SIRASI.filter(k => grouped[k]);
+  const children = [];
+
+  children.push(new Paragraph({ text: 'TAEKWONDO İL İÇİ SEÇME - KATILIMCI LİSTESİ', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }));
+  children.push(new Paragraph({ text: 'Tarih: ' + new Date().toLocaleDateString('tr-TR', {day:'2-digit',month:'long',year:'numeric'}), alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
+
+  const borderStyle = { style: BorderStyle.SINGLE, size: 4, color: '999999' };
+  const cellBorder = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+
+  function hCell(text, w) {
+    return new TableCell({ children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 20, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })],
+      width: { size: w, type: WidthType.PERCENTAGE }, shading: { fill: '3949AB' }, borders: cellBorder });
+  }
+  function dCell(text, w, shade) {
+    return new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(text||'-'), size: 18 })], alignment: AlignmentType.CENTER })],
+      width: { size: w, type: WidthType.PERCENTAGE }, shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder });
   }
 
-  function showTab(t, btn) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + t).classList.add('active');
-    btn.classList.add('active');
-    if (t === 'liste') {
-      if (!sifreKontrol()) { showTab('form', document.querySelectorAll('.tab')[0]); return; }
-      refreshListe();
+  aktif.forEach(kat => {
+    const grup = grouped[kat].sort((a,b) => a.kilo - b.kilo);
+    children.push(new Paragraph({ text: kat + '  (' + grup.length + ' sporcu)', heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }));
+    const rows = [new TableRow({ children: [hCell('Ad Soyad',28),hCell('Doğum Tarihi',16),hCell('Yaş',8),hCell('Kilo',10),hCell('Kulüp',24),hCell('Telefon',14)] })];
+    grup.forEach((s, i) => {
+      rows.push(new TableRow({ children: [
+        dCell(s.ad,28,i%2),dCell(formatTarih(s.dogum_tarihi),16,i%2),dCell(yas(s.dogum_tarihi),8,i%2),
+        dCell(s.kilo+' kg',10,i%2),dCell(s.kulup,24,i%2),dCell(s.telefon,14,i%2)
+      ]}));
+    });
+    children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+    children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
+  });
+
+  children.push(new Paragraph({ spacing: { before: 400 }, children: [new TextRun({ text: 'Toplam Sporcu: ', bold: true }), new TextRun(_sporcular.length + ' kişi')] }));
+  children.push(new Paragraph({ children: [new TextRun({ text: 'Aktif Kategori: ', bold: true }), new TextRun(aktif.length + ' kategori')] }));
+
+  const doc = new Document({ sections: [{ children }] });
+  const blob = await Packer.toBlob(doc);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tkd_katilimci_listesi.docx'; a.click();
+}
+
+// ---- KURA SİSTEMİ ----
+async function initKura() {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?select=*&order=created_at.asc', { headers: HEADERS });
+  _sporcular = await res.json();
+  const grouped = {};
+  _sporcular.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
+  const grid = document.getElementById('kat-grid');
+  grid.innerHTML = '';
+  KILO_SIRASI.forEach(kat => {
+    const btn = document.createElement('button');
+    const count = grouped[kat] ? grouped[kat].length : 0;
+    btn.className = 'kat-btn' + (count < 2 ? ' disabled' : '');
+    btn.innerHTML = kat + '<br><small style="color:var(--text-muted)">' + count + ' sporcu</small>';
+    if (count >= 2) btn.onclick = () => secKategori(kat, grouped[kat], btn);
+    grid.appendChild(btn);
+  });
+}
+
+function secKategori(kat, sporcular, btn) {
+  document.querySelectorAll('.kat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  _secilenKat = kat;
+  document.getElementById('bracket-alan').style.display = 'none';
+  const alan = document.getElementById('kura-sporcu-alan');
+  alan.style.display = 'block';
+  const sorted = [...sporcular].sort((a,b) => a.kilo - b.kilo);
+  let html = `<div class="cat-block" style="margin-bottom:1rem;">
+    <div class="cat-title"><span class="kat-adi">🏷 ${kat}</span><span class="cat-badge">${sorted.length} sporcu</span></div>
+    <table class="guc-table"><thead><tr>
+      <th style="width:30%">Ad Soyad</th><th style="width:14%">Doğum Tarihi</th><th style="width:10%">Kilo</th>
+      <th style="width:26%">Kulüp</th><th style="width:20%">Güç Puanı</th>
+    </tr></thead><tbody>
+    ${sorted.map(s => `<tr>
+      <td>${s.ad}</td><td>${formatTarih(s.dogum_tarihi)}</td><td>${s.kilo} kg</td><td>${s.kulup}</td>
+      <td><input class="guc-input" type="number" min="1" placeholder="1,2,3..." data-id="${s.id}" data-ad="${s.ad}" /></td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+  document.getElementById('kura-sporcu-tablo').innerHTML = html;
+}
+
+function kuraKur() {
+  const inputs = document.querySelectorAll('.guc-input');
+  const sporcular = [];
+  let hata = false;
+  inputs.forEach(inp => {
+    const puan = parseInt(inp.value);
+    if (!inp.value || puan < 1) { inp.style.borderColor = 'var(--danger)'; hata = true; }
+    else { inp.style.borderColor = ''; sporcular.push({ id: inp.dataset.id, ad: inp.dataset.ad, guc: puan }); }
+  });
+  if (hata) { alert('Lütfen tüm sporcular için güç puanı girin (en az 1).'); return; }
+
+  // Kura algoritması: güç puanına göre sırala, sonra ağaç oluştur
+  // Yüksek puan = iyi sporcu = sona kalmalı
+  // 1. tur: en iyi ile en kötüyü eşleştir
+  const sorted = [...sporcular].sort((a,b) => b.guc - a.guc); // en iyiden en kötüye
+  const n = sporcular.length;
+  const bracketSize = Math.pow(2, Math.ceil(Math.log2(n)));
+  const byeCount = bracketSize - n;
+
+  // Seeding: 1. slot en iyi, son slot en kötü
+  // Bye'lar en iyi sporculara verilir (güç puanı 1 ve 2 olanlara)
+  const seeded = [...sorted];
+  const slots = [];
+
+  // Turnuva bracket sıralaması (standart): 1 vs son, 2 vs sondan bir önceki...
+  // Önce bye'ları en iyi sporculara ver
+  const withBye = seeded.slice(0, byeCount).map(s => ({ ...s, bye: true }));
+  const nobye = seeded.slice(byeCount);
+
+  // Bracket pozisyonları
+  const positions = buildBracketOrder(bracketSize);
+  const slotArr = new Array(bracketSize).fill(null);
+
+  // En iyi sporcuları bye alan pozisyonlara yerleştir
+  let byeIdx = 0, nobIdx = 0;
+  positions.forEach(pos => {
+    if (byeIdx < withBye.length) { slotArr[pos] = withBye[byeIdx++]; }
+    else if (nobIdx < nobye.length) { slotArr[pos] = nobye[nobIdx++]; }
+  });
+
+  _bracket = buildBracket(slotArr, bracketSize, _secilenKat);
+  document.getElementById('bracket-baslik').textContent = '🏆 ' + _secilenKat + ' — Turnuva Fikstürü';
+  renderBracket(_bracket);
+  document.getElementById('bracket-alan').style.display = 'block';
+  document.getElementById('bracket-alan').scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildBracketOrder(size) {
+  // Standart turnuva bracket sıralaması
+  if (size === 1) return [0];
+  const half = size / 2;
+  const top = buildBracketOrder(half);
+  const bot = buildBracketOrder(half).map(i => i + half);
+  const result = [];
+  for (let i = 0; i < top.length; i++) { result.push(top[i]); result.push(bot[i]); }
+  return result;
+}
+
+function buildBracket(slots, size, kat) {
+  const rounds = [];
+  let current = [];
+  for (let i = 0; i < size; i += 2) {
+    current.push({ p1: slots[i], p2: slots[i+1] });
+  }
+  rounds.push({ name: size === 2 ? 'Final' : 'İlk Tur', matches: current });
+  let next = current;
+  let roundSize = size / 2;
+  while (roundSize > 1) {
+    const matches = [];
+    for (let i = 0; i < next.length; i += 2) {
+      matches.push({ p1: null, p2: null, tbd: true });
     }
+    roundSize = roundSize / 2;
+    const names = ['Final', 'Yarı Final', 'Çeyrek Final', 'Son 16', 'Son 32'];
+    const rname = roundSize === 1 ? 'Final' : roundSize === 2 ? 'Yarı Final' : roundSize === 4 ? 'Çeyrek Final' : 'Tur';
+    rounds.push({ name: rname, matches });
+    next = matches;
+    if (roundSize === 1) break;
   }
+  return rounds;
+}
 
-  function showToast(msg, type) {
-    const el = document.getElementById('toast');
-    el.className = 'toast ' + type;
-    el.innerHTML = msg;
-    setTimeout(() => el.className = 'toast', 3500);
-  }
-
-  async function kaydet() {
-    const ad = document.getElementById('adsoyad').value.trim();
-    const yas = document.getElementById('yas').value.trim();
-    const kilo = document.getElementById('kilo').value.trim();
-    const kulup = document.getElementById('kulup').value.trim();
-    const telefon = document.getElementById('telefon').value.trim();
-
-    if (!ad || !yas || !kilo || !kulup || !telefon) { showToast('⚠️ Lütfen tüm alanları doldurun.', 'err'); return; }
-
-    const btn = document.getElementById('kaydetBtn');
-    btn.disabled = true; btn.textContent = 'Kaydediliyor...';
-
-    const kategori = kiloKategori(kilo);
-    const body = { ad, yas: parseInt(yas), kilo: parseFloat(kilo), kategori, kulup, telefon };
-
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular', {
-        method: 'POST',
-        headers: { ...HEADERS, 'Prefer': 'return=minimal' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) { const e = await res.text(); throw new Error(e); }
-      document.getElementById('adsoyad').value = '';
-      document.getElementById('yas').value = '';
-      document.getElementById('kilo').value = '';
-      document.getElementById('kulup').value = '';
-      document.getElementById('telefon').value = '';
-      showToast('✅ Kayıt eklendi! Kategori: <strong>' + kategori + '</strong>', 'ok');
-    } catch(e) {
-      showToast('❌ Hata: ' + e.message, 'err');
-    }
-    btn.disabled = false; btn.textContent = 'Kaydı Gönder';
-  }
-
-  let _sporcular = [];
-
-  async function refreshListe() {
-    document.getElementById('liste-content').innerHTML = '<div class="loading"><div class="spin">⏳</div><br>Yükleniyor...</div>';
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?select=*&order=created_at.asc', { headers: HEADERS });
-      if (!res.ok) throw new Error(await res.text());
-      _sporcular = await res.json();
-      renderListe();
-    } catch(e) {
-      document.getElementById('liste-content').innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>Veriler yüklenemedi.<br>' + e.message + '</p></div>';
-    }
-  }
-
-  function renderListe() {
-    const el = document.getElementById('liste-content');
-    if (!_sporcular.length) {
-      el.innerHTML = '<div class="empty"><div class="icon">👥</div><p>Henüz kayıt yok.<br>Kayıt sekmesinden sporcu ekleyebilirsiniz.</p></div>';
-      return;
-    }
-    const grouped = {};
-    _sporcular.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
-    const aktif = KILO_SIRASI.filter(k => grouped[k]);
-
-    let html = `<div class="summary">
-      <div class="stat"><div class="stat-label">Toplam Sporcu</div><div class="stat-val">${_sporcular.length}</div></div>
-      <div class="stat"><div class="stat-label">Aktif Kategori</div><div class="stat-val">${aktif.length}</div></div>
-    </div>`;
-
-    aktif.forEach(kat => {
-      const grup = grouped[kat].sort((a,b) => a.kilo - b.kilo);
-      html += `<div class="cat-block">
-        <div class="cat-title">
-          <span class="kat-adi">🏷 ${kat}</span>
-          <span class="cat-badge">${grup.length} sporcu</span>
+function renderBracket(rounds) {
+  const el = document.getElementById('bracket-content');
+  el.innerHTML = '';
+  rounds.forEach((round, ri) => {
+    const roundEl = document.createElement('div');
+    roundEl.className = 'round';
+    const title = document.createElement('div');
+    title.className = 'round-title';
+    title.textContent = round.name;
+    roundEl.appendChild(title);
+    const matchesEl = document.createElement('div');
+    matchesEl.className = 'matches';
+    round.matches.forEach(m => {
+      const wrap = document.createElement('div');
+      wrap.className = 'match-wrap';
+      const match = document.createElement('div');
+      match.className = 'match';
+      const p1name = m.tbd ? 'Maç Galibi' : (m.p1 ? m.p1.ad : 'BYE');
+      const p2name = m.tbd ? 'Maç Galibi' : (m.p2 ? m.p2.ad : 'BYE');
+      const p1bye = !m.tbd && !m.p1;
+      const p2bye = !m.tbd && !m.p2;
+      match.innerHTML = `
+        <div class="match-player ${p1bye?'bye':''}">
+          ${!m.tbd && m.p1 ? '<span class="seed-badge">'+m.p1.guc+'</span>' : ''}
+          ${p1name}
         </div>
-        <table>
-          <thead><tr>
-            <th style="width:26%">Ad Soyad</th>
-            <th style="width:8%">Yaş</th>
-            <th style="width:10%">Kilo</th>
-            <th style="width:26%">Kulüp</th>
-            <th style="width:22%">Telefon</th>
-            <th style="width:8%"></th>
-          </tr></thead>
-          <tbody>${grup.map(s => `<tr>
-            <td>${s.ad}</td><td>${s.yas}</td><td>${s.kilo} kg</td><td>${s.kulup}</td><td>${s.telefon || '-'}</td>
-            <td><button class="del-btn" onclick="sil(${s.id})" title="Sil">🗑</button></td>
-          </tr>`).join('')}</tbody>
-        </table>
-      </div>`;
-    });
-    el.innerHTML = html;
-  }
-
-  async function sil(id) {
-    if (!confirm('Bu kaydı silmek istiyor musun?')) return;
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?id=eq.' + id, { method: 'DELETE', headers: HEADERS });
-      if (!res.ok) throw new Error(await res.text());
-      await refreshListe();
-    } catch(e) { alert('Silinemedi: ' + e.message); }
-  }
-
-  async function tumunuSil() {
-    if (!confirm('Tüm kayıtları silmek istiyor musun? Bu işlem geri alınamaz!')) return;
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/sporcular?id=gt.0', { method: 'DELETE', headers: HEADERS });
-      if (!res.ok) throw new Error(await res.text());
-      await refreshListe();
-    } catch(e) { alert('Silinemedi: ' + e.message); }
-  }
-
-  const SIFRE = 'Erdaymır1361';
-  let sifreliGiris = false;
-
-  function sifreKontrol() {
-    if (sifreliGiris) return true;
-    const girilen = prompt('Katılımcı listesi için şifre gereklidir:');
-    if (girilen === SIFRE) { sifreliGiris = true; return true; }
-    if (girilen !== null) alert('Hatalı şifre!');
-    return false;
-  }
-
-  function cellStyle(bold, bgRGB, fontRGB, fontSize, hAlign) {
-    return {
-      font: { name: 'Arial', bold: !!bold, color: { rgb: fontRGB || '000000' }, sz: fontSize || 11 },
-      fill: bgRGB ? { patternType: 'solid', fgColor: { rgb: bgRGB } } : { patternType: 'none' },
-      alignment: { horizontal: hAlign || 'left', vertical: 'center', wrapText: false },
-      border: {
-        top:    { style: 'thin', color: { rgb: 'D0D0D0' } },
-        bottom: { style: 'thin', color: { rgb: 'D0D0D0' } },
-        left:   { style: 'thin', color: { rgb: 'D0D0D0' } },
-        right:  { style: 'thin', color: { rgb: 'D0D0D0' } }
+        <div class="match-player ${p2bye?'bye':''}">
+          ${!m.tbd && m.p2 ? '<span class="seed-badge">'+m.p2.guc+'</span>' : ''}
+          ${p2name}
+        </div>`;
+      wrap.appendChild(match);
+      if (ri < rounds.length - 1) {
+        const conn = document.createElement('div');
+        conn.className = 'connector';
+        wrap.appendChild(conn);
       }
-    };
-  }
-
-  function exportExcel() {
-    if (!_sporcular.length) { alert('İndirilecek kayıt yok.'); return; }
-
-    const sorted = [..._sporcular].sort((a,b) =>
-      KILO_SIRASI.indexOf(a.kategori) - KILO_SIRASI.indexOf(b.kategori) || a.kilo - b.kilo
-    );
-
-    const grouped = {};
-    sorted.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
-    const aktif = KILO_SIRASI.filter(k => grouped[k]);
-
-    const wb = XLSX.utils.book_new();
-    const ws = {};
-    const merges = [];
-    let row = 0;
-
-    // ---- BAŞLIK BLOĞU ----
-    const baslikCells = ['A','B','C','D','E','F'];
-    const baslikMetin = ['TAEKWONDO İL İÇİ SEÇME - KATILIMCI LİSTESİ','','','','',''];
-    baslikCells.forEach((col, i) => {
-      ws[col + (row+1)] = { v: baslikMetin[i], t: 's', s: cellStyle(true, '1a237e', 'FFFFFF', 14, 'center') };
+      matchesEl.appendChild(wrap);
     });
-    merges.push({ s:{r:row,c:0}, e:{r:row,c:5} });
-    row++;
+    roundEl.appendChild(matchesEl);
+    el.appendChild(roundEl);
+  });
+}
 
-    // Tarih satırı
-    const bugun = new Date().toLocaleDateString('tr-TR', { day:'2-digit', month:'long', year:'numeric' });
-    baslikCells.forEach((col, i) => {
-      ws[col + (row+1)] = { v: i===0 ? ('Tarih: ' + bugun) : '', t: 's', s: cellStyle(false, '283593', 'B0BEC5', 10, 'left') };
+// ---- BRACKET WORD İNDİR ----
+async function exportBracketWord() {
+  if (!_bracket) return;
+  const { Document, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, HeadingLevel, Packer } = docx;
+  const borderStyle = { style: BorderStyle.SINGLE, size: 4, color: '999999' };
+  const cellBorder = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+  const children = [];
+
+  children.push(new Paragraph({ text: 'TAEKWONDO İL İÇİ SEÇME', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }));
+  children.push(new Paragraph({ text: _secilenKat + ' — Turnuva Fikstürü', heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
+  children.push(new Paragraph({ text: 'Tarih: ' + new Date().toLocaleDateString('tr-TR', {day:'2-digit',month:'long',year:'numeric'}), alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
+
+  _bracket.forEach(round => {
+    children.push(new Paragraph({ text: round.name, heading: HeadingLevel.HEADING_3, spacing: { before: 400, after: 200 } }));
+    const rows = [new TableRow({ children: [
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Sporcu 1', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Güç Puanı', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 15, type: WidthType.PERCENTAGE } }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'VS', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 5, type: WidthType.PERCENTAGE } }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Sporcu 2', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '3949AB' }, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
+    ]})];
+    round.matches.forEach((m, i) => {
+      const shade = i % 2 === 0;
+      const p1 = m.tbd ? 'Önceki Maç Galibi' : (m.p1 ? m.p1.ad : 'BYE (Direkt Geçiş)');
+      const p1g = m.tbd ? '-' : (m.p1 ? String(m.p1.guc) : '-');
+      const p2 = m.tbd ? 'Önceki Maç Galibi' : (m.p2 ? m.p2.ad : 'BYE (Direkt Geçiş)');
+      rows.push(new TableRow({ children: [
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p1, size: 18 })], alignment: AlignmentType.LEFT })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p1g, size: 18, bold: true })], alignment: AlignmentType.CENTER })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 15, type: WidthType.PERCENTAGE } }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'VS', size: 18, bold: true, color: '3949AB' })], alignment: AlignmentType.CENTER })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 5, type: WidthType.PERCENTAGE } }),
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p2, size: 18 })], alignment: AlignmentType.LEFT })], shading: shade ? { fill: 'EEF2FF' } : {}, borders: cellBorder, width: { size: 40, type: WidthType.PERCENTAGE } }),
+      ]}));
     });
-    merges.push({ s:{r:row,c:0}, e:{r:row,c:5} });
-    row++;
+    children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+    children.push(new Paragraph({ text: '', spacing: { after: 300 } }));
+  });
 
-    // Boş ayırıcı
-    baslikCells.forEach(col => { ws[col+(row+1)] = { v:'', t:'s', s: cellStyle(false,'FFFFFF','FFFFFF') }; });
-    row++;
+  const doc = new Document({ sections: [{ children }] });
+  const blob = await Packer.toBlob(doc);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tkd_fikstur_' + _secilenKat.replace(/[^a-z0-9]/gi,'_') + '.docx'; a.click();
+}
 
-    // ---- KATEGORİLER ----
-    aktif.forEach(kat => {
-      const grup = grouped[kat];
-
-      // Kategori başlık satırı
-      baslikCells.forEach((col, i) => {
-        ws[col+(row+1)] = { v: i===0 ? ('🏷  ' + kat + '   (' + grup.length + ' sporcu)') : '', t:'s',
-          s: cellStyle(true, '3949AB', 'FFFFFF', 11, 'left') };
-      });
-      merges.push({ s:{r:row,c:0}, e:{r:row,c:5} });
-      row++;
-
-      // Kolon başlıkları
-      const kolonlar = ['Ad Soyad','Yaş','Kilo (kg)','Kulüp','Telefon',''];
-      baslikCells.forEach((col, i) => {
-        ws[col+(row+1)] = { v: kolonlar[i], t:'s', s: cellStyle(true,'C5CAE9','1A237E',10,'center') };
-      });
-      row++;
-
-      // Sporcu satırları
-      grup.forEach((s, idx) => {
-        const isEven = idx % 2 === 0;
-        const bg = isEven ? 'F8F9FF' : 'FFFFFF';
-        const vals = [s.ad, s.yas, s.kilo, s.kulup, s.telefon || '-', ''];
-        baslikCells.forEach((col, i) => {
-          ws[col+(row+1)] = { v: vals[i], t: (i===1||i===2)?'n':'s', s: cellStyle(false, bg, '212121', 10, i===1||i===2?'center':'left') };
-        });
-        row++;
-      });
-
-      // Kategori sonu boşluk
-      baslikCells.forEach(col => { ws[col+(row+1)] = { v:'', t:'s', s: cellStyle(false,'FAFAFA','FAFAFA') }; });
-      row++;
-    });
-
-    // ---- ÖZET SATIRLARI ----
-    baslikCells.forEach((col,i) => {
-      ws[col+(row+1)] = { v: i===0?'TOPLAM SPORCU':'', t:'s', s: cellStyle(true,'E8EAF6','1A237E',10,'left') };
-    });
-    ws['B'+(row+1)] = { v: sorted.length, t:'n', s: cellStyle(true,'E8EAF6','3949AB',11,'center') };
-    merges.push({ s:{r:row,c:1}, e:{r:row,c:5} });
-    row++;
-
-    baslikCells.forEach((col,i) => {
-      ws[col+(row+1)] = { v: i===0?'AKTİF KATEGORİ':'', t:'s', s: cellStyle(true,'E8EAF6','1A237E',10,'left') };
-    });
-    ws['B'+(row+1)] = { v: aktif.length, t:'n', s: cellStyle(true,'E8EAF6','3949AB',11,'center') };
-    merges.push({ s:{r:row,c:1}, e:{r:row,c:5} });
-
-    ws['!ref'] = 'A1:F' + (row+1);
-    ws['!merges'] = merges;
-    ws['!cols'] = [
-      { wch: 26 }, { wch: 8 }, { wch: 11 }, { wch: 28 }, { wch: 18 }, { wch: 4 }
-    ];
-    ws['!rows'] = [{ hpt: 28 }, { hpt: 16 }];
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Seçme Listesi');
-    XLSX.writeFile(wb, 'tkd_secme_listesi.xlsx');
-  }
-
-  refreshListe();
+refreshListe();
 </script>
 </body>
 </html>
