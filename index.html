@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Taekwondo İl İçi Seçme Kayıt Sistemi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -26,31 +27,10 @@
     --radius: 10px;
   }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .logo {
-    width: 42px; height: 42px;
-    background: var(--accent-bg);
-    border: 1px solid var(--accent-border);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 14px; }
+  .logo { width: 42px; height: 42px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
   header h1 { font-size: 17px; font-weight: 600; color: var(--text); }
   header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
@@ -69,32 +49,18 @@
 
   .field { margin-bottom: 1.1rem; }
   .field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 7px; font-weight: 500; }
-  .field input {
-    width: 100%; padding: 10px 13px;
-    background: var(--surface2); border: 1px solid var(--border-strong);
-    border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
+  .field input { width: 100%; padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
   .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.15); }
   .field input::placeholder { color: var(--text-muted); }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
 
-  .submit-btn {
-    width: 100%; padding: 11px; margin-top: 6px;
-    background: var(--accent); color: #fff;
-    border: none; border-radius: var(--radius);
-    font-size: 15px; font-weight: 600; cursor: pointer;
-    transition: all 0.15s; letter-spacing: 0.01em;
-  }
+  .submit-btn { width: 100%; padding: 11px; margin-top: 6px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
   .submit-btn:hover { background: var(--accent-hover); }
   .submit-btn:active { transform: scale(0.99); }
   .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .toast {
-    display: none; margin-top: 14px; padding: 11px 15px;
-    border-radius: var(--radius); font-size: 13px; font-weight: 500;
-  }
+  .toast { display: none; margin-top: 14px; padding: 11px 15px; border-radius: var(--radius); font-size: 13px; font-weight: 500; }
   .toast.ok { display: block; background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
   .toast.err { display: block; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
 
@@ -102,13 +68,7 @@
   .list-top h2 { font-size: 15px; font-weight: 600; }
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  .icon-btn {
-    padding: 7px 14px; border-radius: 8px;
-    border: 1px solid var(--border-strong);
-    background: transparent; color: var(--text-muted);
-    font-size: 13px; cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; gap: 6px;
-  }
+  .icon-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
   .icon-btn:hover { background: var(--surface2); color: var(--text); }
   .icon-btn.danger { border-color: rgba(239,68,68,0.4); color: var(--danger); }
   .icon-btn.danger:hover { background: var(--danger-bg); }
@@ -123,25 +83,12 @@
   .empty p { font-size: 14px; }
 
   .cat-block { margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .cat-title {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 16px;
-    background: var(--accent-bg);
-    border-bottom: 1px solid var(--accent-border);
-  }
+  .cat-title { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--accent-bg); border-bottom: 1px solid var(--accent-border); }
   .cat-title .kat-adi { font-weight: 600; font-size: 14px; color: var(--accent); }
-  .cat-badge {
-    font-size: 11px; font-weight: 600;
-    background: var(--accent); color: #fff;
-    padding: 2px 9px; border-radius: 20px;
-  }
+  .cat-badge { font-size: 11px; font-weight: 600; background: var(--accent); color: #fff; padding: 2px 9px; border-radius: 20px; }
 
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  thead th {
-    padding: 9px 14px; font-size: 11px; font-weight: 600;
-    color: var(--text-muted); text-align: left; text-transform: uppercase; letter-spacing: 0.05em;
-    background: var(--surface2); border-bottom: 1px solid var(--border);
-  }
+  thead th { padding: 9px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: left; text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface2); border-bottom: 1px solid var(--border); }
   tbody td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text); word-break: break-word; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover td { background: rgba(255,255,255,0.02); }
@@ -178,7 +125,6 @@
     <button class="tab" onclick="showTab('liste', this)">📊 Katılımcı Listesi</button>
   </div>
 
-  <!-- FORM -->
   <div id="tab-form" class="panel active">
     <div class="card">
       <div class="card-title">Sporcu Bilgilerini Girin</div>
@@ -210,13 +156,12 @@
     </div>
   </div>
 
-  <!-- LİSTE -->
   <div id="tab-liste" class="panel">
     <div class="list-top">
       <h2>Kilo Kategorilerine Göre Liste</h2>
       <div class="btn-row">
         <button class="icon-btn" onclick="refreshListe()">🔄 Yenile</button>
-        <button class="icon-btn" onclick="exportCSV()">⬇️ CSV İndir</button>
+        <button class="icon-btn" onclick="exportExcel()">📥 Excel İndir</button>
         <button class="icon-btn danger" onclick="tumunuSil()">🗑 Temizle</button>
       </div>
     </div>
@@ -230,7 +175,6 @@
   const SUPABASE_URL = 'https://knaqukgvxgrjmdzwljyr.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuYXF1a2d2eGdyam1kendsanlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzM4MTQsImV4cCI6MjA5ODEwOTgxNH0.G6OJ00QgHn8upK1_xvJcDE9FoB3xmlEh3Yj94abVf5w';
   const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
-
   const KILO_SIRASI = ['-30 kg','-33 kg','-37 kg','-41 kg','-45 kg','-49 kg','-53 kg','-57 kg','-61 kg','-65 kg','-73 kg','-87 kg','+87 kg'];
 
   function kiloKategori(kg) {
@@ -277,7 +221,6 @@
         body: JSON.stringify(body)
       });
       if (!res.ok) { const e = await res.text(); throw new Error(e); }
-
       document.getElementById('adsoyad').value = '';
       document.getElementById('yas').value = '';
       document.getElementById('kilo').value = '';
@@ -287,7 +230,6 @@
     } catch(e) {
       showToast('❌ Hata: ' + e.message, 'err');
     }
-
     btn.disabled = false; btn.textContent = 'Kaydı Gönder';
   }
 
@@ -311,7 +253,6 @@
       el.innerHTML = '<div class="empty"><div class="icon">👥</div><p>Henüz kayıt yok.<br>Kayıt sekmesinden sporcu ekleyebilirsiniz.</p></div>';
       return;
     }
-
     const grouped = {};
     _sporcular.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
     const aktif = KILO_SIRASI.filter(k => grouped[k]);
@@ -330,25 +271,20 @@
         </div>
         <table>
           <thead><tr>
-            <th style="width:28%">Ad Soyad</th>
+            <th style="width:26%">Ad Soyad</th>
             <th style="width:8%">Yaş</th>
             <th style="width:10%">Kilo</th>
-            <th style="width:28%">Kulüp</th>
-            <th style="width:18%">Telefon</th>
+            <th style="width:26%">Kulüp</th>
+            <th style="width:22%">Telefon</th>
             <th style="width:8%"></th>
           </tr></thead>
           <tbody>${grup.map(s => `<tr>
-            <td>${s.ad}</td>
-            <td>${s.yas}</td>
-            <td>${s.kilo} kg</td>
-            <td>${s.kulup}</td>
-            <td>${s.telefon || '-'}</td>
+            <td>${s.ad}</td><td>${s.yas}</td><td>${s.kilo} kg</td><td>${s.kulup}</td><td>${s.telefon || '-'}</td>
             <td><button class="del-btn" onclick="sil(${s.id})" title="Sil">🗑</button></td>
           </tr>`).join('')}</tbody>
         </table>
       </div>`;
     });
-
     el.innerHTML = html;
   }
 
@@ -370,16 +306,117 @@
     } catch(e) { alert('Silinemedi: ' + e.message); }
   }
 
-  function exportCSV() {
-    if (!_sporcular.length) { alert('İndirilecek kayıt yok.'); return; }
-    const sorted = [..._sporcular].sort((a,b) => KILO_SIRASI.indexOf(a.kategori) - KILO_SIRASI.indexOf(b.kategori) || a.kilo - b.kilo);
-    let csv = 'Kategori,Ad Soyad,Yaş,Kilo (kg),Kulüp,Telefon\n';
-    sorted.forEach(s => { csv += `"${s.kategori}","${s.ad}",${s.yas},${s.kilo},"${s.kulup}","${s.telefon || ''}"\n`; });
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tkd_secme_listesi.csv'; a.click();
+  function cellStyle(bold, bgRGB, fontRGB, fontSize, hAlign) {
+    return {
+      font: { name: 'Arial', bold: !!bold, color: { rgb: fontRGB || '000000' }, sz: fontSize || 11 },
+      fill: bgRGB ? { patternType: 'solid', fgColor: { rgb: bgRGB } } : { patternType: 'none' },
+      alignment: { horizontal: hAlign || 'left', vertical: 'center', wrapText: false },
+      border: {
+        top:    { style: 'thin', color: { rgb: 'D0D0D0' } },
+        bottom: { style: 'thin', color: { rgb: 'D0D0D0' } },
+        left:   { style: 'thin', color: { rgb: 'D0D0D0' } },
+        right:  { style: 'thin', color: { rgb: 'D0D0D0' } }
+      }
+    };
   }
 
-  // Sayfa açılınca liste sekmesindeyse yükle
+  function exportExcel() {
+    if (!_sporcular.length) { alert('İndirilecek kayıt yok.'); return; }
+
+    const sorted = [..._sporcular].sort((a,b) =>
+      KILO_SIRASI.indexOf(a.kategori) - KILO_SIRASI.indexOf(b.kategori) || a.kilo - b.kilo
+    );
+
+    const grouped = {};
+    sorted.forEach(s => { if (!grouped[s.kategori]) grouped[s.kategori] = []; grouped[s.kategori].push(s); });
+    const aktif = KILO_SIRASI.filter(k => grouped[k]);
+
+    const wb = XLSX.utils.book_new();
+    const ws = {};
+    const merges = [];
+    let row = 0;
+
+    // ---- BAŞLIK BLOĞU ----
+    const baslikCells = ['A','B','C','D','E','F'];
+    const baslikMetin = ['TAEKWONDO İL İÇİ SEÇME - KATILIMCI LİSTESİ','','','','',''];
+    baslikCells.forEach((col, i) => {
+      ws[col + (row+1)] = { v: baslikMetin[i], t: 's', s: cellStyle(true, '1a237e', 'FFFFFF', 14, 'center') };
+    });
+    merges.push({ s:{r:row,c:0}, e:{r:row,c:5} });
+    row++;
+
+    // Tarih satırı
+    const bugun = new Date().toLocaleDateString('tr-TR', { day:'2-digit', month:'long', year:'numeric' });
+    baslikCells.forEach((col, i) => {
+      ws[col + (row+1)] = { v: i===0 ? ('Tarih: ' + bugun) : '', t: 's', s: cellStyle(false, '283593', 'B0BEC5', 10, 'left') };
+    });
+    merges.push({ s:{r:row,c:0}, e:{r:row,c:5} });
+    row++;
+
+    // Boş ayırıcı
+    baslikCells.forEach(col => { ws[col+(row+1)] = { v:'', t:'s', s: cellStyle(false,'FFFFFF','FFFFFF') }; });
+    row++;
+
+    // ---- KATEGORİLER ----
+    aktif.forEach(kat => {
+      const grup = grouped[kat];
+
+      // Kategori başlık satırı
+      baslikCells.forEach((col, i) => {
+        ws[col+(row+1)] = { v: i===0 ? ('🏷  ' + kat + '   (' + grup.length + ' sporcu)') : '', t:'s',
+          s: cellStyle(true, '3949AB', 'FFFFFF', 11, 'left') };
+      });
+      merges.push({ s:{r:row,c:0}, e:{r:row,c:5} });
+      row++;
+
+      // Kolon başlıkları
+      const kolonlar = ['Ad Soyad','Yaş','Kilo (kg)','Kulüp','Telefon',''];
+      baslikCells.forEach((col, i) => {
+        ws[col+(row+1)] = { v: kolonlar[i], t:'s', s: cellStyle(true,'C5CAE9','1A237E',10,'center') };
+      });
+      row++;
+
+      // Sporcu satırları
+      grup.forEach((s, idx) => {
+        const isEven = idx % 2 === 0;
+        const bg = isEven ? 'F8F9FF' : 'FFFFFF';
+        const vals = [s.ad, s.yas, s.kilo, s.kulup, s.telefon || '-', ''];
+        baslikCells.forEach((col, i) => {
+          ws[col+(row+1)] = { v: vals[i], t: (i===1||i===2)?'n':'s', s: cellStyle(false, bg, '212121', 10, i===1||i===2?'center':'left') };
+        });
+        row++;
+      });
+
+      // Kategori sonu boşluk
+      baslikCells.forEach(col => { ws[col+(row+1)] = { v:'', t:'s', s: cellStyle(false,'FAFAFA','FAFAFA') }; });
+      row++;
+    });
+
+    // ---- ÖZET SATIRLARI ----
+    baslikCells.forEach((col,i) => {
+      ws[col+(row+1)] = { v: i===0?'TOPLAM SPORCU':'', t:'s', s: cellStyle(true,'E8EAF6','1A237E',10,'left') };
+    });
+    ws['B'+(row+1)] = { v: sorted.length, t:'n', s: cellStyle(true,'E8EAF6','3949AB',11,'center') };
+    merges.push({ s:{r:row,c:1}, e:{r:row,c:5} });
+    row++;
+
+    baslikCells.forEach((col,i) => {
+      ws[col+(row+1)] = { v: i===0?'AKTİF KATEGORİ':'', t:'s', s: cellStyle(true,'E8EAF6','1A237E',10,'left') };
+    });
+    ws['B'+(row+1)] = { v: aktif.length, t:'n', s: cellStyle(true,'E8EAF6','3949AB',11,'center') };
+    merges.push({ s:{r:row,c:1}, e:{r:row,c:5} });
+
+    ws['!ref'] = 'A1:F' + (row+1);
+    ws['!merges'] = merges;
+    ws['!cols'] = [
+      { wch: 26 }, { wch: 8 }, { wch: 11 }, { wch: 28 }, { wch: 18 }, { wch: 4 }
+    ];
+    ws['!rows'] = [{ hpt: 28 }, { hpt: 16 }];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Seçme Listesi');
+    XLSX.writeFile(wb, 'tkd_secme_listesi.xlsx');
+  }
+
   refreshListe();
 </script>
 </body>
